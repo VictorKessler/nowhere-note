@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=nowhere_note
+      - POSTGRES_PASSWORD=local
+      - POSTGRES_USER=local
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./scripts/postgres:/docker-entrypoint-initdb.d
+
+  liquibase:
+    image: liquibase/liquibase:latest
+    volumes:
+      - ./src/main/resources/db/changelog:/liquibase/changelog
+    command:
+      - --url=jdbc:postgresql://postgres:5432/nowhere_note
+      - --defaultSchemaName=public
+      - --changeLogFile=db.changelog-master.xml
+      - --username=local
+      - --password=local
+      - --driver=org.postgresql.Driver
+      - --search-path=/liquibase/changelog
+      - --logLevel=info
+      - update
